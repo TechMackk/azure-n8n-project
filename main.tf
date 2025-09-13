@@ -82,7 +82,7 @@ resource "azurerm_linux_virtual_machine" "vm1" {
   ]
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file("C:\Users\91781\.ssh\id_ed25519.pub")
   }
   os_disk {
     caching              = "ReadWrite"
@@ -107,7 +107,7 @@ resource "azurerm_linux_virtual_machine" "vm2" {
   ]
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file("C:\Users\91781\.ssh\id_ed25519.pub")
   }
   os_disk {
     caching              = "ReadWrite"
