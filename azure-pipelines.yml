@@ -1,0 +1,53 @@
+# This pipeline will automatically deploy your Terraform infrastructure to Azure.
+# It is triggered by a push to the main branch of your Git repository.
+
+trigger:
+  - main
+
+variables:
+  # The path to your Terraform files within the repository.
+  # If your files are in the root, use '.'
+  TF_ROOT: 'azure-n8n-project'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Terraform_Deployment
+  displayName: 'Terraform Deployment to Azure'
+  jobs:
+  - job: Deploy
+    displayName: 'Deploy Terraform'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Authenticate with Azure'
+      inputs:
+        azureSubscription: 'Azure ARM Connection'  # This is the name of your service connection
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          echo "Authenticating with Azure..."
+
+    - task: TerraformInstaller@0
+      displayName: 'Install Terraform'
+      inputs:
+        terraformVersion: 'latest'
+
+    - script: |
+        # Initialize Terraform to download providers and modules.
+        terraform init -backend-config="key=$(TERRAFORM_BACKEND_KEY)"
+      displayName: 'Terraform Init'
+      workingDirectory: $(TF_ROOT)
+
+    - script: |
+        # Generate and show a plan of what will be created.
+        terraform plan -out=tfplan
+      displayName: 'Terraform Plan'
+      workingDirectory: $(TF_ROOT)
+
+    - script: |
+        # Apply the changes to create the resources. The -auto-approve flag is used
+        # for non-interactive environments.
+        terraform apply -auto-approve tfplan
+      displayName: 'Terraform Apply'
+      workingDirectory: $(TF_ROOT)
