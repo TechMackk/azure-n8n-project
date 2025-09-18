@@ -1,0 +1,59 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: Default
+
+variables:
+  - group: Terraform-Creds-Group
+
+jobs:
+  - job: DeployInfrastructure
+    displayName: 'Deploy Azure Infrastructure with Terraform'
+    steps:
+      - task: TerraformInstaller@0
+        displayName: 'Install Terraform'
+        inputs:
+          terraformVersion: 'latest'
+
+      - script: terraform init -reconfigure
+        displayName: 'Terraform Init with Remote Backend'
+        workingDirectory: terraform
+        env:
+          ARM_CLIENT_ID: $(TF_CLIENT_ID)
+          ARM_CLIENT_SECRET: $(TF_CLIENT_SECRET)
+          ARM_SUBSCRIPTION_ID: $(TF_SUBSCRIPTION_ID)
+          ARM_TENANT_ID: $(TF_TENANT_ID)
+          TF_VAR_admin_password: $(TF_VAR_admin_password)
+
+      - script: terraform validate
+        displayName: 'Terraform Validate'
+        workingDirectory: terraform
+        env:
+          ARM_CLIENT_ID: $(TF_CLIENT_ID)
+          ARM_CLIENT_SECRET: $(TF_CLIENT_SECRET)
+          ARM_SUBSCRIPTION_ID: $(TF_SUBSCRIPTION_ID)
+          ARM_TENANT_ID: $(TF_TENANT_ID)
+          TF_VAR_admin_password: $(TF_VAR_admin_password)
+
+      - script: terraform plan -out=tfplan
+        displayName: 'Terraform Plan'
+        workingDirectory: terraform
+        env:
+          ARM_CLIENT_ID: $(TF_CLIENT_ID)
+          ARM_CLIENT_SECRET: $(TF_CLIENT_SECRET)
+          ARM_SUBSCRIPTION_ID: $(TF_SUBSCRIPTION_ID)
+          ARM_TENANT_ID: $(TF_TENANT_ID)
+          TF_VAR_admin_password: $(TF_VAR_admin_password)
+
+      - script: terraform apply -auto-approve tfplan
+        displayName: 'Terraform Apply'
+        workingDirectory: terraform
+        env:
+          ARM_CLIENT_ID: $(TF_CLIENT_ID)
+          ARM_CLIENT_SECRET: $(TF_CLIENT_SECRET)
+          ARM_SUBSCRIPTION_ID: $(TF_SUBSCRIPTION_ID)
+          ARM_TENANT_ID: $(TF_TENANT_ID)
+          TF_VAR_admin_password: $(TF_VAR_admin_password)

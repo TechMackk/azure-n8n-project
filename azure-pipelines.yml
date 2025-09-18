@@ -1,0 +1,26 @@
+trigger: none
+
+pool:
+  name: Default
+
+variables:
+  - group: Terraform-Creds-Group
+
+jobs:
+  - job: BackendSetup
+    displayName: 'Provision Terraform Backend Storage'
+    steps:
+      - task: TerraformInstaller@0
+        inputs:
+          terraformVersion: 'latest'
+
+      - script: |
+          terraform init
+          terraform apply -auto-approve
+        workingDirectory: backend-setup
+        displayName: 'Terraform Apply Backend Setup'
+        env:
+          ARM_CLIENT_ID: $(TF_CLIENT_ID)
+          ARM_CLIENT_SECRET: $(TF_CLIENT_SECRET)
+          ARM_SUBSCRIPTION_ID: $(TF_SUBSCRIPTION_ID)
+          ARM_TENANT_ID: $(TF_TENANT_ID)
